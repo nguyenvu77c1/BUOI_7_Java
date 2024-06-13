@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security5"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Home Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Tùy chỉnh CSS cho trang */
+        .container {
+            margin-top: 50px;
+        }
+        .course-table th {
+            text-align: center;
+        }
+    </style>
+    <script>
+        function confirmDelete(event) {
+            if (!confirm("Bạn có chắc chắn muốn xóa khóa học này?")) {
+                event.preventDefault();
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+<section layout:fragment="content" class="container">
+    <h2>Danh sách các khóa học</h2>
+    <div class="mb-4">
+        <input type="text" id="searchInput" onkeyup="searchCourses()" placeholder="Search for courses.." class="form-control">
+    </div>
+    <table class="table table-bordered course-table">
+        <thead>
+        <tr>
+            <th>Tên khóa học</th>
+            <th>Tên giảng viên</th>
+            <th>Ngày học</th>
+            <th>Giá khóa học</th>
+            <th>Địa chỉ của giảng viên</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="course : ${Listcourse}">
+            <td th:text="${course.lectureName}"></td>
+            <td th:text="${course.teacherName}"></td>
+            <td th:text="${course.startDate}"></td>
+            <td th:text="${course.place}"></td>
+            <td th:text="${course.address}"></td>
+            <td>
+                <a th:href="@{/course/edit/{id}(id=${course.id})}" class="btn btn-primary btn-sm"
+                   sec:authorize="hasAuthority('ADMIN')">Chỉnh sửa</a>
+                <a  class="btn btn-primary btn-sm"
+                   sec:authorize="hasAuthority('USER')">Đăng ký</a>
+                <a th:href="@{/course/delete/{id}(id=${course.id})}" class="btn btn-danger btn-sm" onclick="confirmDelete(event)"
+                   sec:authorize="hasAuthority('ADMIN')">Xóa</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+</body>
+</html>
+<script>
+    function searchCourses() {
+        var searchInput = document.getElementById("searchInput");
+        var searchTerm = searchInput.value.toLowerCase();
+        var courseRows = document.getElementsByTagName("tr");
+
+        for (var i = 1; i < courseRows.length; i++) {
+            var nameCell = courseRows[i].getElementsByTagName("td")[0];
+            var teacherCell = courseRows[i].getElementsByTagName("td")[1];
+            var courseName = nameCell.textContent.toLowerCase();
+            var teacherName = teacherCell.textContent.toLowerCase();
+
+            if (courseName.includes(searchTerm) || teacherName.includes(searchTerm)) {
+                courseRows[i].style.display = "";
+            } else {
+                courseRows[i].style.display = "none";
+            }
+        }
+    }
+</script>
